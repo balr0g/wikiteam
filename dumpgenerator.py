@@ -406,6 +406,9 @@ def getXMLPageCore(headers={}, params={}, config={}, session=None):
         if c > 0 and c < maxretries:
             wait = increment * c < maxseconds and increment * \
                 c or maxseconds  # incremental until maxseconds
+            if "The action you have requested is limited to users in the group" in xml:
+                print 'Special:Export requires wiki authentication. Cannot export.'
+                exit(1)
             print '    XML for "%s" is wrong. Waiting %d seconds and reloading...' % (params['pages'], wait)
             time.sleep(wait)
             # reducing server load requesting smallest chunks (if curonly then
@@ -432,6 +435,8 @@ def getXMLPageCore(headers={}, params={}, config={}, session=None):
                     params['pages']))
                 return ''  # empty xml
         # FIXME HANDLE HTTP Errors HERE
+        print(config['index'])
+        print(params)
         r = session.post(url=config['index'], data=params, headers=headers)
         handleStatusCode(r)
         xml = r.text
